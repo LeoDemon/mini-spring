@@ -1,5 +1,7 @@
 package tech.demonlee.minis;
 
+import tech.demonlee.minis.beans.BeansException;
+import tech.demonlee.minis.context.ClassPathXmlApplicationContext;
 import tech.demonlee.minis.test.AService;
 
 /**
@@ -8,7 +10,7 @@ import tech.demonlee.minis.test.AService;
  */
 public class Test1 {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws BeansException {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
         AService aService = (AService) context.getBean("aservice");
         aService.sayHello();

@@ -1,4 +1,4 @@
-package tech.demonlee.minis;
+package tech.demonlee.minis.beans.factory.config;
 
 /**
  * @author Demon.Lee
