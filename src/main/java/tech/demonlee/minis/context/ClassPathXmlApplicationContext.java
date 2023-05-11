@@ -15,13 +15,20 @@ import tech.demonlee.minis.core.Resource;
  */
 public class ClassPathXmlApplicationContext implements BeanFactory {
 
+    // 引入 BeanFactory 来获得对应的能力，而不是直接实现对应的方法
     BeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
+        // 从外部加载资源文件
         Resource resource = new ClassPathXmlResource(fileName);
+
+        // 构造默认的 BeanFactory 核心类：获取 Bean 和 BeanDefinition
         BeanFactory beanFactory = new SimpleBeanFactory();
+
+        // 将 BeanDefinition 注册到 BeanFactory
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
         reader.loadBeanDefinitions(resource);
+
         this.beanFactory = beanFactory;
     }
 

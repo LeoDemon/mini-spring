@@ -13,9 +13,9 @@ import java.util.*;
  */
 public class SimpleBeanFactory implements BeanFactory {
 
-    private List<BeanDefinition> beanDefinitions = new ArrayList<>();
-    private List<String> beanNames = new ArrayList<>();
-    private Map<String, Object> singletons = new HashMap<>();
+    private final List<BeanDefinition> beanDefinitions = new ArrayList<>();
+    private final List<String> beanNames = new ArrayList<>();
+    private final Map<String, Object> singletons = new HashMap<>();
 
     public SimpleBeanFactory() {
     }
