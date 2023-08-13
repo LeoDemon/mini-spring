@@ -29,10 +29,6 @@ public class PropertyValues {
         this.propertyValueList.add(pv);
     }
 
-    public void addPropertyValue(String propertyName, Object propertyValue) {
-        this.propertyValueList.add(new PropertyValue(propertyName, propertyValue));
-    }
-
     public PropertyValue[] getPropertyValues() {
         return this.propertyValueList.toArray(new PropertyValue[0]);
     }
@@ -79,27 +75,40 @@ public class PropertyValues {
         private final Class<?>[] types;
         private final Object[] values;
         private final String[] methods;
+        private final Boolean[] isRefs;
 
         public Params() {
             int cnt = PropertyValues.this.size();
             this.types = new Class[cnt];
             this.values = new Object[cnt];
             this.methods = new String[cnt];
+            this.isRefs = new Boolean[cnt];
+
             for (int i = 0; i < cnt; i++) {
                 PropertyValue pv = propertyValueList.get(i);
                 String type = pv.getType();
                 Object value = pv.getValue();
                 String name = pv.getName();
+                boolean isRef = pv.isRef();
 
-                if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
-                    types[i] = Integer.class;
-                } else if ("int".equals(type)) {
-                    types[i] = int.class;
+                if (isRef) {
+                    try {
+                        types[i] = Class.forName(type);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
-                    types[i] = String.class;
+                    if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
+                        types[i] = Integer.class;
+                    } else if ("int".equals(type)) {
+                        types[i] = int.class;
+                    } else {
+                        types[i] = String.class;
+                    }
                 }
                 values[i] = value;
                 methods[i] = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+                isRefs[i] = isRef;
             }
         }
 
@@ -113,6 +122,10 @@ public class PropertyValues {
 
         public String[] getMethods() {
             return methods;
+        }
+
+        public Boolean[] getIsRefs() {
+            return isRefs;
         }
     }
 

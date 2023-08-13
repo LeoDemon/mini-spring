@@ -18,6 +18,10 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
     BeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
+        this(fileName, true);
+    }
+
+    public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
         // 从外部加载资源文件
         Resource resource = new ClassPathXmlResource(fileName);
 
@@ -29,6 +33,10 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
         reader.loadBeanDefinitions(resource);
 
         this.beanFactory = beanFactory;
+
+        if (isRefresh) {
+            beanFactory.refresh();
+        }
     }
 
     @Override

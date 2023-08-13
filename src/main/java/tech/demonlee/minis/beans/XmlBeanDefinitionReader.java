@@ -14,6 +14,7 @@ public class XmlBeanDefinitionReader {
 
     private static final String XML_CONF_BEAN_ID = "id";
     private static final String XML_CONF_BEAN_CLASS_NAME = "class";
+    private static final String XML_CONF_BEAN_LAZY_INIT = "lazyInit";
     private static final String XML_CONF_BEAN_CONSTRUCTOR_ELEMENT = "constructor-arg";
     private static final String XML_CONF_BEAN_CONSTRUCTOR_TYPE = "type";
     private static final String XML_CONF_BEAN_CONSTRUCTOR_VALUE = "value";
@@ -22,6 +23,7 @@ public class XmlBeanDefinitionReader {
     private static final String XML_CONF_BEAN_PROPERTY_TYPE = "type";
     private static final String XML_CONF_BEAN_PROPERTY_VALUE = "value";
     private static final String XML_CONF_BEAN_PROPERTY_NAME = "name";
+    private static final String XML_CONF_BEAN_PROPERTY_REF = "ref";
 
     SimpleBeanFactory simpleBeanFactory;
 
@@ -34,13 +36,25 @@ public class XmlBeanDefinitionReader {
             Element element = (Element) resource.next();
             String beanId = element.attributeValue(XML_CONF_BEAN_ID);
             String beanClassName = element.attributeValue(XML_CONF_BEAN_CLASS_NAME);
+            String lazyInitStr = element.attributeValue(XML_CONF_BEAN_LAZY_INIT);
+            boolean lazyInit = Boolean.parseBoolean(lazyInitStr);
+
             BeanDefinition beanDefinition = new BeanDefinition(beanId, beanClassName);
+            beanDefinition.setLazyInit(lazyInit);
 
             ArgumentValues argumentValues = getArgumentValues(element);
             beanDefinition.setConstructorArgumentValues(argumentValues);
 
             PropertyValues propertyValues = getPropertyValues(element);
             beanDefinition.setPropertyValues(propertyValues);
+            List<String> refs = propertyValues.getPropertyValueList().stream()
+                    .filter(PropertyValue::isRef)
+                    .map(v -> v.getValue().toString())
+                    .toList();
+            if (!refs.isEmpty()) {
+                String[] refArr = refs.toArray(new String[0]);
+                beanDefinition.setDependsOn(refArr);
+            }
 
             this.simpleBeanFactory.registerBeanDefinition(beanId, beanDefinition);
         }
@@ -77,6 +91,16 @@ public class XmlBeanDefinitionReader {
         String type = e.attributeValue(XML_CONF_BEAN_PROPERTY_TYPE);
         String value = e.attributeValue(XML_CONF_BEAN_PROPERTY_VALUE);
         String name = e.attributeValue(XML_CONF_BEAN_PROPERTY_NAME);
-        return new PropertyValue(type, value, name);
+        String ref = e.attributeValue(XML_CONF_BEAN_PROPERTY_REF);
+
+        boolean isRef = false;
+        if (Objects.nonNull(ref)) {
+            value = ref;
+            isRef = true;
+        }
+
+        PropertyValue propertyValue = new PropertyValue(type, value, name, isRef);
+
+        return propertyValue;
     }
 }

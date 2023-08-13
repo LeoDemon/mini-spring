@@ -8,20 +8,22 @@ import java.util.Objects;
  */
 public class PropertyValue {
 
-    private Object value;
     private String type;
+    private Object value;
     private String name;
-
-    public PropertyValue(String name, Object value) {
-        this("", value, name);
-    }
+    private boolean isRef;
 
     public PropertyValue(String type, Object value, String name) {
+        this(type, value, name, false);
+    }
+
+    public PropertyValue(String type, Object value, String name, boolean isRef) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(name);
         this.type = type;
         this.value = value;
         this.name = name;
+        this.isRef = isRef;
     }
 
     public Object getValue() {
@@ -34,6 +36,10 @@ public class PropertyValue {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isRef() {
+        return isRef;
     }
 
     @Override

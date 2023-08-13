@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans>
-    <bean id="aservice" class="tech.demonlee.minis.test.AServiceImpl">
+    <bean id="aservice" class="tech.demonlee.minis.test.AServiceImpl" lazyInit="true">
         <constructor-arg type="String" name="name" value="长空"/>
         <constructor-arg type="int" name="level" value="3"/>
+
+        <property type="tech.demonlee.minis.test.BService" name="bs" ref="bs"/>
         <property type="String" name="property1" value="Hello,Hello..."/>
         <property type="String" name="property2" value="你好，你好..."/>
+    </bean>
+
+    <bean id="bs" class="tech.demonlee.minis.test.BServiceImpl">
+        <property type="tech.demonlee.minis.test.CService" name="cs" ref="cs"/>
+    </bean>
+
+    <bean id="cs" class="tech.demonlee.minis.test.CServiceImpl">
+        <property type="tech.demonlee.minis.test.AService" name="as" ref="aservice"/>
     </bean>
 </beans>

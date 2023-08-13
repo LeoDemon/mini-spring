@@ -3,9 +3,7 @@ package tech.demonlee.minis.beans;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,8 +16,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
 
     private Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
+    private List<String> beanDefinitionNames = new ArrayList<>(64);
+    private final Map<String, Object> earlySingletonObject = new HashMap<>(64);
 
     public SimpleBeanFactory() {
+    }
+
+    public void refresh() {
+        for (String beanName : beanDefinitionNames) {
+            BeanDefinition beanDefinition = beanDefinitions.get(beanName);
+            if (Objects.isNull(beanDefinition) || beanDefinition.isLazyInit()) {
+                System.out.println("lazy init for bean: " + beanName);
+                return;
+            }
+
+            try {
+                getBean(beanName);
+            } catch (BeansException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override
@@ -29,18 +45,32 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
             return singleton;
         }
 
+        singleton = earlySingletonObject.get(beanName);
+        if (Objects.nonNull(singleton)) {
+            return singleton;
+        }
+        System.out.println("getBean for: " + beanName);
+
         BeanDefinition beanDefinition = beanDefinitions.get(beanName);
         singleton = this.createBean(beanDefinition);
         if (Objects.isNull(singleton)) {
-            throw new RuntimeException("no such bean for beanDefinition: " + beanDefinition.getId());
+            throw new BeansException("no such bean for beanDefinition: " + beanDefinition.getId());
         }
+
+        registerBean(beanName, singleton);
+
+        return singleton;
+    }
+
+    public void registerBean(String beanName, Object singleton) {
         this.registerSingleton(beanName, singleton);
+
+        // bean post processor
+        BeanDefinition beanDefinition = beanDefinitions.get(beanName);
         if (Objects.nonNull(beanDefinition.getInitMethodName())) {
             // Todo: init method
             System.out.println("invoke init method...");
         }
-
-        return singleton;
     }
 
     @Override
@@ -73,18 +103,13 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
             return;
         }
         this.beanDefinitions.put(name, beanDefinition);
-        if (!beanDefinition.isLazyInit()) {
-            try {
-                getBean(name);
-            } catch (BeansException e) {
-                System.out.println("init Bean " + name + " directly failed");
-            }
-        }
+        this.beanDefinitionNames.add(name);
     }
 
     @Override
     public void removeBeanDefinition(String name) {
         this.beanDefinitions.remove(name);
+        this.beanDefinitionNames.remove(name);
         this.removeSingleton(name);
     }
 
@@ -99,6 +124,22 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
     }
 
     private Object createBean(BeanDefinition beanDefinition) {
+        Object obj = doCreateBean(beanDefinition);
+        this.earlySingletonObject.put(beanDefinition.getId(), obj);
+
+        Class<?> clz;
+        try {
+            clz = Class.forName(beanDefinition.getClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        handleProperties(beanDefinition, clz, obj);
+
+        return obj;
+    }
+
+    private Object doCreateBean(BeanDefinition beanDefinition) {
         Class<?> clz;
         Object obj;
         Constructor<?> con;
@@ -114,34 +155,49 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                 con = clz.getConstructor(argvParams.getTypes());
                 obj = con.newInstance(argvParams.getValues());
             } else {
-                obj = clz.getDeclaredConstructor().newInstance();
+                obj = clz.getConstructor().newInstance();
             }
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
                  IllegalAccessException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        PropertyValues.Params propertyParams = null;
-        PropertyValues propertyValues = beanDefinition.getPropertyValues();
-        if (Objects.nonNull(propertyValues)) {
-            propertyParams = propertyValues.getParams();
-        }
-        if (Objects.nonNull(propertyParams)) {
-            int len = propertyValues.size();
-            for (int i = 0; i < len; i++) {
-                String methodName = propertyParams.getMethods()[i];
-                Class<?>[] types = new Class<?>[]{propertyParams.getTypes()[i]};
-                Object[] values = new Object[]{propertyParams.getValues()[i]};
-                try {
-                    Method method = clz.getMethod(methodName, types);
-                    method.invoke(obj, values);
-                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
+            throw new RuntimeException(e);
         }
 
         return obj;
+    }
+
+    private void handleProperties(BeanDefinition beanDefinition, Class<?> clz, Object obj) {
+        PropertyValues.Params propertyParams;
+        PropertyValues propertyValues = beanDefinition.getPropertyValues();
+        if (Objects.isNull(propertyValues)) {
+            return;
+        }
+
+        propertyParams = propertyValues.getParams();
+        if (Objects.isNull(propertyParams)) {
+            return;
+        }
+
+        int len = propertyValues.size();
+        for (int i = 0; i < len; i++) {
+            String methodName = propertyParams.getMethods()[i];
+            boolean isRef = propertyParams.getIsRefs()[i];
+            Class<?>[] types = new Class<?>[]{propertyParams.getTypes()[i]};
+            Object[] values = new Object[]{propertyParams.getValues()[i]};
+            if (isRef) {
+                Object refBean;
+                try {
+                    refBean = getBean(values[0].toString());
+                } catch (BeansException e) {
+                    throw new RuntimeException(e);
+                }
+                values[0] = refBean;
+            }
+            try {
+                Method method = clz.getMethod(methodName, types);
+                method.invoke(obj, values);
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
