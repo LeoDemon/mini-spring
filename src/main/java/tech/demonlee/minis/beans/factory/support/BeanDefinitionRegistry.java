@@ -1,4 +1,6 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory.support;
+
+import tech.demonlee.minis.beans.factory.config.BeanDefinition;
 
 /**
  * @author Demon.Lee

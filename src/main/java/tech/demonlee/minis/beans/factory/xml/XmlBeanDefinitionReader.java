@@ -1,6 +1,11 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory.xml;
 
 import org.dom4j.Element;
+import tech.demonlee.minis.beans.*;
+import tech.demonlee.minis.beans.factory.config.ConstructorArgumentValue;
+import tech.demonlee.minis.beans.factory.config.ConstructorArgumentValues;
+import tech.demonlee.minis.beans.factory.config.BeanDefinition;
+import tech.demonlee.minis.beans.factory.support.SimpleBeanFactory;
 import tech.demonlee.minis.core.Resource;
 
 import java.util.List;
@@ -42,7 +47,7 @@ public class XmlBeanDefinitionReader {
             BeanDefinition beanDefinition = new BeanDefinition(beanId, beanClassName);
             beanDefinition.setLazyInit(lazyInit);
 
-            ArgumentValues argumentValues = getArgumentValues(element);
+            ConstructorArgumentValues argumentValues = getArgumentValues(element);
             beanDefinition.setConstructorArgumentValues(argumentValues);
 
             PropertyValues propertyValues = getPropertyValues(element);
@@ -60,21 +65,21 @@ public class XmlBeanDefinitionReader {
         }
     }
 
-    private ArgumentValues getArgumentValues(Element element) {
-        ArgumentValues argumentValues = null;
+    private ConstructorArgumentValues getArgumentValues(Element element) {
+        ConstructorArgumentValues argumentValues = null;
         List<Element> argElements = element.elements(XML_CONF_BEAN_CONSTRUCTOR_ELEMENT);
         if (Objects.nonNull(argElements) && !argElements.isEmpty()) {
-            argumentValues = new ArgumentValues();
+            argumentValues = new ConstructorArgumentValues();
             argElements.stream().map(this::getArgumentValue).forEach(argumentValues::addArgumentValue);
         }
         return argumentValues;
     }
 
-    private ArgumentValue getArgumentValue(Element e) {
+    private ConstructorArgumentValue getArgumentValue(Element e) {
         String type = e.attributeValue(XML_CONF_BEAN_CONSTRUCTOR_TYPE);
         String value = e.attributeValue(XML_CONF_BEAN_CONSTRUCTOR_VALUE);
         String name = e.attributeValue(XML_CONF_BEAN_CONSTRUCTOR_NAME);
-        return new ArgumentValue(type, value, name);
+        return new ConstructorArgumentValue(type, value, name);
     }
 
     private PropertyValues getPropertyValues(Element element) {

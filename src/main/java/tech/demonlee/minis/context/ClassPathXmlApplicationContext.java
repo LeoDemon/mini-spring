@@ -1,9 +1,9 @@
 package tech.demonlee.minis.context;
 
 import tech.demonlee.minis.beans.BeansException;
-import tech.demonlee.minis.beans.BeanFactory;
-import tech.demonlee.minis.beans.SimpleBeanFactory;
-import tech.demonlee.minis.beans.XmlBeanDefinitionReader;
+import tech.demonlee.minis.beans.factory.BeanFactory;
+import tech.demonlee.minis.beans.factory.support.SimpleBeanFactory;
+import tech.demonlee.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import tech.demonlee.minis.core.ClassPathXmlResource;
 import tech.demonlee.minis.core.Resource;
 

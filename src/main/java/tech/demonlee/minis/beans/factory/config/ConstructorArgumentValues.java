@@ -1,4 +1,4 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory.config;
 
 import java.util.*;
 
@@ -6,18 +6,18 @@ import java.util.*;
  * @author Demon.Lee
  * @date 2023-05-21 14:50
  */
-public class ArgumentValues {
+public class ConstructorArgumentValues {
 
-    private final List<ArgumentValue> argumentValues = new LinkedList<>();
+    private final List<ConstructorArgumentValue> argumentValues = new LinkedList<>();
 
-    public ArgumentValues() {
+    public ConstructorArgumentValues() {
     }
 
-    public ArgumentValue getIndexedArgumentValue(int index) {
+    public ConstructorArgumentValue getIndexedArgumentValue(int index) {
         return this.argumentValues.get(index);
     }
 
-    public void addArgumentValue(ArgumentValue argumentValue) {
+    public void addArgumentValue(ConstructorArgumentValue argumentValue) {
         this.argumentValues.add(argumentValue);
     }
 
@@ -41,11 +41,11 @@ public class ArgumentValues {
         private final Object[] values;
 
         public Params() {
-            int cnt = ArgumentValues.this.getArgumentCount();
+            int cnt = ConstructorArgumentValues.this.getArgumentCount();
             types = new Class[cnt];
             values = new Object[cnt];
             for (int i = 0; i < cnt; i++) {
-                ArgumentValue argv = argumentValues.get(i);
+                ConstructorArgumentValue argv = argumentValues.get(i);
                 String type = argv.getType();
                 Object value = argv.getValue();
 

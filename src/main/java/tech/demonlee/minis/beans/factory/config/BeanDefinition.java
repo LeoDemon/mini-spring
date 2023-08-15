@@ -1,4 +1,6 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory.config;
+
+import tech.demonlee.minis.beans.PropertyValues;
 
 /**
  * @author Demon.Lee
@@ -11,7 +13,7 @@ public class BeanDefinition {
 
     private boolean lazyInit = false;
     private String[] dependsOn;
-    private ArgumentValues constructorArgumentValues;
+    private ConstructorArgumentValues constructorArgumentValues;
     private PropertyValues propertyValues;
     private String initMethodName;
     private volatile Object beanClass;
@@ -56,11 +58,11 @@ public class BeanDefinition {
         this.dependsOn = dependsOn;
     }
 
-    public ArgumentValues getConstructorArgumentValues() {
+    public ConstructorArgumentValues getConstructorArgumentValues() {
         return constructorArgumentValues;
     }
 
-    public void setConstructorArgumentValues(ArgumentValues constructorArgumentValues) {
+    public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
         this.constructorArgumentValues = constructorArgumentValues;
     }
 

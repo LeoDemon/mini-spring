@@ -1,4 +1,4 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory.config;
 
 import java.util.Objects;
 
@@ -6,18 +6,18 @@ import java.util.Objects;
  * @author Demon.Lee
  * @date 2023-05-19 07:35
  */
-public class ArgumentValue {
+public class ConstructorArgumentValue {
 
     private Object value;
     private String type;
     private String name;
 
-    public ArgumentValue(String type, Object value) {
+    public ConstructorArgumentValue(String type, Object value) {
         this.type = type;
         this.value = value;
     }
 
-    public ArgumentValue(String type, Object value, String name) {
+    public ConstructorArgumentValue(String type, Object value, String name) {
         this.type = type;
         this.value = value;
         this.name = name;
@@ -39,7 +39,7 @@ public class ArgumentValue {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ArgumentValue that = (ArgumentValue) o;
+        ConstructorArgumentValue that = (ConstructorArgumentValue) o;
         return Objects.equals(value, that.value) &&
                 Objects.equals(type, that.type) &&
                 Objects.equals(name, that.name);

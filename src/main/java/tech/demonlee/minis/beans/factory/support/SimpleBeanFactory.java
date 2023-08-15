@@ -1,4 +1,9 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory.support;
+
+import tech.demonlee.minis.beans.*;
+import tech.demonlee.minis.beans.factory.BeanFactory;
+import tech.demonlee.minis.beans.factory.config.ConstructorArgumentValues;
+import tech.demonlee.minis.beans.factory.config.BeanDefinition;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -144,8 +149,8 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         Object obj;
         Constructor<?> con;
 
-        ArgumentValues.Params argvParams = null;
-        ArgumentValues argumentValues = beanDefinition.getConstructorArgumentValues();
+        ConstructorArgumentValues.Params argvParams = null;
+        ConstructorArgumentValues argumentValues = beanDefinition.getConstructorArgumentValues();
         if (Objects.nonNull(argumentValues)) {
             argvParams = argumentValues.getParams();
         }

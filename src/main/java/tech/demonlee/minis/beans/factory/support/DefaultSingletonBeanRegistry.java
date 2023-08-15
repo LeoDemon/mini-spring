@@ -1,4 +1,6 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory.support;
+
+import tech.demonlee.minis.beans.factory.config.SingletonBeanRegistry;
 
 import java.util.ArrayList;
 import java.util.List;

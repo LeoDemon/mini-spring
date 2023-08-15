@@ -1,4 +1,6 @@
-package tech.demonlee.minis.beans;
+package tech.demonlee.minis.beans.factory;
+
+import tech.demonlee.minis.beans.BeansException;
 
 /**
  * @author Demon.Lee
