@@ -9,9 +9,9 @@
         <property type="String" name="property2" value="你好，你好..."/>
     </bean>
 
-    <bean id="bs" class="tech.demonlee.minis.test.BServiceImpl">
+    <bean id="bs" class="tech.demonlee.minis.test.BServiceImpl" init-method="init">
     </bean>
 
-    <bean id="cs" class="tech.demonlee.minis.test.CServiceImpl">
+    <bean id="cs" class="tech.demonlee.minis.test.CServiceImpl" init-method="init">
     </bean>
 </beans>

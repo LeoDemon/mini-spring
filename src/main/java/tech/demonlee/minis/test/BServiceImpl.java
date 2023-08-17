@@ -14,6 +14,10 @@ public class BServiceImpl implements BService {
     @Autowired
     private CService cs;
 
+    private void init() {
+        System.out.println("Init " + this.getClass().getName() + " now, and cs is: " + getCServiceName());
+    }
+
     public CService getCs() {
         return cs;
     }

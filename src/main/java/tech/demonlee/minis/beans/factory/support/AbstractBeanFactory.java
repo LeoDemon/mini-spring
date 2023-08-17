@@ -83,15 +83,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         if (beanDefinition.hasNoInitMethod()) {
             return;
         }
-        System.out.println("invoke init method: " + beanDefinition.getInitMethodName());
         Class<?> clazz = bean.getClass();
         Method initMethod;
         try {
-            initMethod = clazz.getMethod(beanDefinition.getInitMethodName());
+            initMethod = clazz.getDeclaredMethod(beanDefinition.getInitMethodName());
+            initMethod.setAccessible(true);
             initMethod.invoke(bean);
         } catch (Exception ex) {
             throw new RuntimeException("invoke init method " + beanDefinition.getInitMethodWithClass() +
-                    " failed: " + ex.getMessage());
+                    " failed: " + ex.getClass().getName() + ", " + ex.getMessage());
         }
     }
 

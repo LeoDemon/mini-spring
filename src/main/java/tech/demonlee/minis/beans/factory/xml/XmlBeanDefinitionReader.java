@@ -21,6 +21,7 @@ public class XmlBeanDefinitionReader {
     private static final String XML_CONF_BEAN_ID = "id";
     private static final String XML_CONF_BEAN_CLASS_NAME = "class";
     private static final String XML_CONF_BEAN_LAZY_INIT = "lazyInit";
+    private static final String XML_CONF_BEAN_INIT_METHOD = "init-method";
     private static final String XML_CONF_BEAN_CONSTRUCTOR_ELEMENT = "constructor-arg";
     private static final String XML_CONF_BEAN_CONSTRUCTOR_TYPE = "type";
     private static final String XML_CONF_BEAN_CONSTRUCTOR_VALUE = "value";
@@ -43,10 +44,12 @@ public class XmlBeanDefinitionReader {
             String beanId = element.attributeValue(XML_CONF_BEAN_ID);
             String beanClassName = element.attributeValue(XML_CONF_BEAN_CLASS_NAME);
             String lazyInitStr = element.attributeValue(XML_CONF_BEAN_LAZY_INIT);
+            String initMethod = element.attributeValue(XML_CONF_BEAN_INIT_METHOD);
             boolean lazyInit = Boolean.parseBoolean(lazyInitStr);
 
             BeanDefinition beanDefinition = new BeanDefinition(beanId, beanClassName);
             beanDefinition.setLazyInit(lazyInit);
+            beanDefinition.setInitMethodName(initMethod);
 
             ConstructorArgumentValues argumentValues = getArgumentValues(element);
             beanDefinition.setConstructorArgumentValues(argumentValues);

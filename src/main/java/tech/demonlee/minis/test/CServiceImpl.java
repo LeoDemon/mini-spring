@@ -16,6 +16,10 @@ public class CServiceImpl implements CService {
     public CServiceImpl() {
     }
 
+    void init() {
+        System.out.println("This is " + this.getClass().getName() + ", and I am init now...");
+    }
+
     public void setAservice(AService aservice) {
         this.aservice = aservice;
     }
