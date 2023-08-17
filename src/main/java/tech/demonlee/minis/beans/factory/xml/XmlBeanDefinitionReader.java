@@ -1,11 +1,12 @@
 package tech.demonlee.minis.beans.factory.xml;
 
 import org.dom4j.Element;
-import tech.demonlee.minis.beans.*;
+import tech.demonlee.minis.beans.PropertyValue;
+import tech.demonlee.minis.beans.PropertyValues;
+import tech.demonlee.minis.beans.factory.config.BeanDefinition;
 import tech.demonlee.minis.beans.factory.config.ConstructorArgumentValue;
 import tech.demonlee.minis.beans.factory.config.ConstructorArgumentValues;
-import tech.demonlee.minis.beans.factory.config.BeanDefinition;
-import tech.demonlee.minis.beans.factory.support.SimpleBeanFactory;
+import tech.demonlee.minis.beans.factory.support.AbstractBeanFactory;
 import tech.demonlee.minis.core.Resource;
 
 import java.util.List;
@@ -30,10 +31,10 @@ public class XmlBeanDefinitionReader {
     private static final String XML_CONF_BEAN_PROPERTY_NAME = "name";
     private static final String XML_CONF_BEAN_PROPERTY_REF = "ref";
 
-    SimpleBeanFactory simpleBeanFactory;
+    AbstractBeanFactory beanFactory;
 
-    public XmlBeanDefinitionReader(SimpleBeanFactory simpleBeanFactory) {
-        this.simpleBeanFactory = simpleBeanFactory;
+    public XmlBeanDefinitionReader(AbstractBeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
     }
 
     public void loadBeanDefinitions(Resource resource) {
@@ -51,17 +52,19 @@ public class XmlBeanDefinitionReader {
             beanDefinition.setConstructorArgumentValues(argumentValues);
 
             PropertyValues propertyValues = getPropertyValues(element);
-            beanDefinition.setPropertyValues(propertyValues);
-            List<String> refs = propertyValues.getPropertyValueList().stream()
-                    .filter(PropertyValue::isRef)
-                    .map(v -> v.getValue().toString())
-                    .toList();
-            if (!refs.isEmpty()) {
-                String[] refArr = refs.toArray(new String[0]);
-                beanDefinition.setDependsOn(refArr);
+            if (Objects.nonNull(propertyValues)) {
+                beanDefinition.setPropertyValues(propertyValues);
+                List<String> refs = propertyValues.getPropertyValueList().stream()
+                        .filter(PropertyValue::isRef)
+                        .map(v -> v.getValue().toString())
+                        .toList();
+                if (!refs.isEmpty()) {
+                    String[] refArr = refs.toArray(new String[0]);
+                    beanDefinition.setDependsOn(refArr);
+                }
             }
 
-            this.simpleBeanFactory.registerBeanDefinition(beanId, beanDefinition);
+            this.beanFactory.registerBeanDefinition(beanId, beanDefinition);
         }
     }
 
@@ -104,8 +107,6 @@ public class XmlBeanDefinitionReader {
             isRef = true;
         }
 
-        PropertyValue propertyValue = new PropertyValue(type, value, name, isRef);
-
-        return propertyValue;
+        return new PropertyValue(type, value, name, isRef);
     }
 }

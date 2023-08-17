@@ -14,17 +14,18 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Demon.Lee
  * @date 2023-05-10 23:34
- * @desc 1、让 {@link SimpleBeanFactory} 继承 {@link DefaultSingletonBeanRegistry}，
- * 从而保证通过 {@link SimpleBeanFactory} 创建的 Bean 都是单例的；
+ * @desc 1、让 {@link AbstractBeanFactory} 继承 {@link DefaultSingletonBeanRegistry}，
+ * 从而保证通过 {@link AbstractBeanFactory} 创建的 Bean 都是单例的；
  * 2、BeanFactory 是工厂，SingletonBeanRegistry 是仓库，角色分离，前者负责 Bean 的获取，后者负责 Bean 的存储。
  */
-public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory,
+        BeanDefinitionRegistry {
 
     private Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
     private List<String> beanDefinitionNames = new ArrayList<>(64);
     private final Map<String, Object> earlySingletonObject = new HashMap<>(64);
 
-    public SimpleBeanFactory() {
+    public AbstractBeanFactory() {
     }
 
     public void refresh() {
@@ -64,17 +65,33 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
 
         registerBean(beanName, singleton);
 
+        // BeanPostProcessor
+        applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+
+        invokeInitMethod(beanDefinition, singleton);
+
+        applyBeanPostProcessorAfterInitialization(singleton, beanName);
+
         return singleton;
     }
 
     public void registerBean(String beanName, Object singleton) {
         this.registerSingleton(beanName, singleton);
+    }
 
-        // bean post processor
-        BeanDefinition beanDefinition = beanDefinitions.get(beanName);
-        if (Objects.nonNull(beanDefinition.getInitMethodName())) {
-            // Todo: init method
-            System.out.println("invoke init method...");
+    private void invokeInitMethod(BeanDefinition beanDefinition, Object bean) {
+        if (beanDefinition.hasNoInitMethod()) {
+            return;
+        }
+        System.out.println("invoke init method: " + beanDefinition.getInitMethodName());
+        Class<?> clazz = bean.getClass();
+        Method initMethod;
+        try {
+            initMethod = clazz.getMethod(beanDefinition.getInitMethodName());
+            initMethod.invoke(bean);
+        } catch (Exception ex) {
+            throw new RuntimeException("invoke init method " + beanDefinition.getInitMethodWithClass() +
+                    " failed: " + ex.getMessage());
         }
     }
 
@@ -205,4 +222,8 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
             }
         }
     }
+
+    public abstract Object applyBeanPostProcessorBeforeInitialization(Object bean, String beanName) throws BeansException;
+
+    public abstract Object applyBeanPostProcessorAfterInitialization(Object bean, String beanName) throws BeansException;
 }

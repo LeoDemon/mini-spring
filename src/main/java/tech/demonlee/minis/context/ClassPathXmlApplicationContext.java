@@ -2,7 +2,8 @@ package tech.demonlee.minis.context;
 
 import tech.demonlee.minis.beans.BeansException;
 import tech.demonlee.minis.beans.factory.BeanFactory;
-import tech.demonlee.minis.beans.factory.support.SimpleBeanFactory;
+import tech.demonlee.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import tech.demonlee.minis.beans.factory.config.AutowireCapableBeanFactory;
 import tech.demonlee.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import tech.demonlee.minis.core.ClassPathXmlResource;
 import tech.demonlee.minis.core.Resource;
@@ -15,7 +16,7 @@ import tech.demonlee.minis.core.Resource;
 public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
 
     // 引入 BeanFactory 来获得对应的能力，而不是直接实现对应的方法
-    BeanFactory beanFactory;
+    AutowireCapableBeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
         this(fileName, true);
@@ -26,7 +27,7 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
         Resource resource = new ClassPathXmlResource(fileName);
 
         // 构造默认的 BeanFactory 核心类：获取 Bean 和 BeanDefinition
-        SimpleBeanFactory beanFactory = new SimpleBeanFactory();
+        AutowireCapableBeanFactory beanFactory = new AutowireCapableBeanFactory();
 
         // 将 BeanDefinition 注册到 BeanFactory
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
@@ -35,8 +36,21 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
         this.beanFactory = beanFactory;
 
         if (isRefresh) {
-            beanFactory.refresh();
+            refresh();
         }
+    }
+
+    public void refresh() {
+        registerBeanPostProcessors(this.beanFactory);
+        onRefresh();
+    }
+
+    private void registerBeanPostProcessors(AutowireCapableBeanFactory beanFactory) {
+        beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+    }
+
+    private void onRefresh() {
+        this.beanFactory.refresh();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package tech.demonlee.minis.test;
 
+import tech.demonlee.minis.beans.factory.annotation.Autowired;
+
 import java.util.Optional;
 
 /**
@@ -8,22 +10,23 @@ import java.util.Optional;
  */
 public class CServiceImpl implements CService {
 
-    private AService as;
+    @Autowired
+    private AService aservice;
 
     public CServiceImpl() {
     }
 
-    public void setAs(AService as) {
-        this.as = as;
+    public void setAservice(AService aservice) {
+        this.aservice = aservice;
     }
 
     @Override
     public void greet() {
         System.out.println("Hey, this is " + this.getClass().getName());
-        System.out.println("And, I have a as: " + getAServiceName());
+        System.out.println("And, I have a aservice: " + getAServiceName());
     }
 
     private String getAServiceName() {
-        return Optional.ofNullable(as).map(v -> v.getClass().getName()).orElse(null);
+        return Optional.ofNullable(aservice).map(v -> v.getClass().getName()).orElse(null);
     }
 }

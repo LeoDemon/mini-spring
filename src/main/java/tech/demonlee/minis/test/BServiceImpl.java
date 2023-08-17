@@ -1,5 +1,7 @@
 package tech.demonlee.minis.test;
 
+import tech.demonlee.minis.beans.factory.annotation.Autowired;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -9,6 +11,7 @@ import java.util.Optional;
  */
 public class BServiceImpl implements BService {
 
+    @Autowired
     private CService cs;
 
     public CService getCs() {

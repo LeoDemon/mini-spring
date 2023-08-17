@@ -2,6 +2,8 @@ package tech.demonlee.minis.beans.factory.config;
 
 import tech.demonlee.minis.beans.PropertyValues;
 
+import java.util.Objects;
+
 /**
  * @author Demon.Lee
  * @date 2023-04-23 13:36
@@ -82,6 +84,14 @@ public class BeanDefinition {
         this.initMethodName = initMethodName;
     }
 
+    public boolean hasInitMethod() {
+        return Objects.nonNull(initMethodName) && !initMethodName.isBlank();
+    }
+
+    public boolean hasNoInitMethod() {
+        return !hasInitMethod();
+    }
+
     public Object getBeanClass() {
         return beanClass;
     }
@@ -112,5 +122,12 @@ public class BeanDefinition {
 
     public boolean isPrototype() {
         return SCOPE_PROTOTYPE.equals(scope);
+    }
+
+    public String getInitMethodWithClass() {
+        if (hasNoInitMethod()) {
+            return null;
+        }
+        return this.className + "." + this.initMethodName;
     }
 }

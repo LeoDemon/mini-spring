@@ -10,10 +10,8 @@
     </bean>
 
     <bean id="bs" class="tech.demonlee.minis.test.BServiceImpl">
-        <property type="tech.demonlee.minis.test.CService" name="cs" ref="cs"/>
     </bean>
 
     <bean id="cs" class="tech.demonlee.minis.test.CServiceImpl">
-        <property type="tech.demonlee.minis.test.AService" name="as" ref="aservice"/>
     </bean>
 </beans>
