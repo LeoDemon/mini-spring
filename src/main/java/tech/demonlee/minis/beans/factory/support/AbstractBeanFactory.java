@@ -1,15 +1,21 @@
 package tech.demonlee.minis.beans.factory.support;
 
-import tech.demonlee.minis.beans.*;
-import tech.demonlee.minis.beans.factory.BeanFactory;
-import tech.demonlee.minis.beans.factory.config.ConstructorArgumentValues;
-import tech.demonlee.minis.beans.factory.config.BeanDefinition;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import tech.demonlee.minis.beans.BeansException;
+import tech.demonlee.minis.beans.PropertyValues;
+import tech.demonlee.minis.beans.factory.config.BeanDefinition;
+import tech.demonlee.minis.beans.factory.config.ConfigurableBeanFactory;
+import tech.demonlee.minis.beans.factory.config.ConstructorArgumentValues;
 
 /**
  * @author Demon.Lee
@@ -18,11 +24,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * 从而保证通过 {@link AbstractBeanFactory} 创建的 Bean 都是单例的；
  * 2、BeanFactory 是工厂，SingletonBeanRegistry 是仓库，角色分离，前者负责 Bean 的获取，后者负责 Bean 的存储。
  */
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory,
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory,
         BeanDefinitionRegistry {
 
-    private Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
-    private List<String> beanDefinitionNames = new ArrayList<>(64);
+    protected Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+    protected List<String> beanDefinitionNames = new ArrayList<>(64);
     private final Map<String, Object> earlySingletonObject = new HashMap<>(64);
 
     public AbstractBeanFactory() {
@@ -30,7 +36,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     public void refresh() {
         for (String beanName : beanDefinitionNames) {
-            BeanDefinition beanDefinition = beanDefinitions.get(beanName);
+            BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
             if (Objects.isNull(beanDefinition) || beanDefinition.isLazyInit()) {
                 System.out.println("lazy init for bean: " + beanName);
                 return;
@@ -57,7 +63,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         }
         System.out.println("getBean for: " + beanName);
 
-        BeanDefinition beanDefinition = beanDefinitions.get(beanName);
+        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
         singleton = this.createBean(beanDefinition);
         if (Objects.isNull(singleton)) {
             throw new BeansException("no such bean for beanDefinition: " + beanDefinition.getId());
@@ -96,25 +102,25 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     @Override
-    public Boolean containsBean(String beanName) {
+    public boolean containsBean(String beanName) {
         return this.containsSingleton(beanName);
     }
 
     @Override
     public boolean isSingleton(String beanName) {
-        BeanDefinition beanDefinition = this.beanDefinitions.get(beanName);
+        BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
         return Optional.ofNullable(beanDefinition).map(BeanDefinition::isSingleton).orElse(false);
     }
 
     @Override
     public boolean isPrototype(String beanName) {
-        BeanDefinition beanDefinition = this.beanDefinitions.get(beanName);
+        BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
         return Optional.ofNullable(beanDefinition).map(BeanDefinition::isPrototype).orElse(false);
     }
 
     @Override
     public Class<?> getType(String beanName) {
-        BeanDefinition beanDefinition = this.beanDefinitions.get(beanName);
+        BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
         return Optional.ofNullable(beanDefinition).map(BeanDefinition::getClass).orElse(null);
     }
 
@@ -124,25 +130,25 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             System.out.println("registerBeanDefinition error for null");
             return;
         }
-        this.beanDefinitions.put(name, beanDefinition);
+        this.beanDefinitionMap.put(name, beanDefinition);
         this.beanDefinitionNames.add(name);
     }
 
     @Override
     public void removeBeanDefinition(String name) {
-        this.beanDefinitions.remove(name);
+        this.beanDefinitionMap.remove(name);
         this.beanDefinitionNames.remove(name);
         this.removeSingleton(name);
     }
 
     @Override
     public BeanDefinition getBeanDefinition(String name) {
-        return this.beanDefinitions.get(name);
+        return this.beanDefinitionMap.get(name);
     }
 
     @Override
     public boolean containsBeanDefinition(String name) {
-        return this.beanDefinitions.containsKey(name);
+        return this.beanDefinitionMap.containsKey(name);
     }
 
     private Object createBean(BeanDefinition beanDefinition) {
