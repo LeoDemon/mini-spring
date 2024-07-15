@@ -10,7 +10,7 @@ public interface BeanFactory {
 
     Object getBean(String beanName) throws BeansException;
 
-    Boolean containsBean(String beanName);
+    boolean containsBean(String beanName);
 
     boolean isSingleton(String beanName);
 

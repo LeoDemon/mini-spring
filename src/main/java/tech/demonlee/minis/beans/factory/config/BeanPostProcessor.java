@@ -1,6 +1,7 @@
 package tech.demonlee.minis.beans.factory.config;
 
 import tech.demonlee.minis.beans.BeansException;
+import tech.demonlee.minis.beans.factory.BeanFactory;
 
 /**
  * @author Demon.Lee
@@ -11,4 +12,6 @@ public interface BeanPostProcessor {
     Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException;
 
     Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
+
+    void setBeanFactory(BeanFactory beanFactory);
 }
